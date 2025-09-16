@@ -1,5 +1,6 @@
 package com.neoapps.model.product;
 
+import com.neoapps.exceptions.DomainException;
 import com.neoapps.model.brand.Brand;
 import com.neoapps.model.category.Category;
 import com.neoapps.model.supplier.Supplier;
@@ -72,6 +73,9 @@ public class Product {
     }
 
     public void updateStock(Integer stock) {
+        if (this.stock.value().equals(stock)) {
+            throw new DomainException("The stock provided can't be equal to the current stock", "StockQuantity");
+        }
         this.stock = new Stock(stock);
     }
 

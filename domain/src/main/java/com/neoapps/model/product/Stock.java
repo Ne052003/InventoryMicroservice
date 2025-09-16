@@ -8,15 +8,6 @@ public record Stock(Integer value) {
         validate(value);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-
-        if (!(o instanceof Stock other)) return false;
-
-        return this.value.equals(other.value);
-    }
-
     public void validate(Integer value) {
         if (value == null) throw new DomainException("Can't be null", "Stock");
         if (value < 0) {
