@@ -9,9 +9,13 @@ public interface ProductRepositoryGateway {
 
     Optional<Product> getProductById(Long id);
 
-    Boolean existsByName(String name);
+    boolean existsByName(String name);
+
+    void updateProduct(Product product);
+
+    boolean existsById(Long id);
 
     List<Product> getAllProducts();
 
-    Product createProduct(Product product);
+    void createProduct(Product product);
 }

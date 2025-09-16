@@ -1,6 +1,7 @@
 package com.neoapps.driven_adapters.repository;
 
 import com.neoapps.driven_adapters.entities.ProductEntity;
+import com.neoapps.driven_adapters.exceptions.RepositoryException;
 import com.neoapps.driven_adapters.mappers.ProductMapper;
 import com.neoapps.model.gateway.ProductRepositoryGateway;
 import com.neoapps.model.product.Product;
@@ -30,28 +31,40 @@ public class ProductRepositoryImpl implements ProductRepositoryGateway {
     }
 
     @Override
-    public Boolean existsByName(String name) {
+    public boolean existsByName(String name) {
         return productJpaRepository.existsByName(name);
     }
 
     @Override
-    public List<Product> getAllProducts() {
-        return List.of();
+
+    public void updateProduct(Product product) {
+
+        ProductEntity productEntity = productMapper.toProductEntity(product);
+        productEntity.setId(product.getId());
+        productJpaRepository.save(productEntity);
+
     }
 
     @Override
-    public Product createProduct(Product product) {
+    public boolean existsById(Long id) {
+        return productJpaRepository.existsById(id);
+    }
 
-        if (product == null) {
-            return null;
-        }
+    @Override
+    public List<Product> getAllProducts() {
+        List<ProductEntity> productEntities = productJpaRepository.findAll();
+        return productEntities.stream().map(productMapper::toProduct).toList();
+    }
+
+    @Override
+    public void createProduct(Product product) {
 
         ProductEntity productEntity = productMapper.toProductEntity(product);
 
-        ProductEntity savedEntity = productJpaRepository.save(productEntity);
+        productJpaRepository.save(productEntity);
 
-        ProductEntity fullEntity = productJpaRepository.findByIdWithRelations(savedEntity.getId()).orElseThrow();
-
-        return productMapper.toProduct(fullEntity);
+        if (!productJpaRepository.existsByName(product.getName())) {
+            throw new RepositoryException("The product could not be saved", "Product");
+        }
     }
 }

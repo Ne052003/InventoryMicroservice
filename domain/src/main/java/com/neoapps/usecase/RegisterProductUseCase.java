@@ -7,7 +7,6 @@ import com.neoapps.model.gateway.ProductRepositoryGateway;
 import com.neoapps.model.product.Product;
 import com.neoapps.model.supplier.Supplier;
 import com.neoapps.usecase.dtos.CreateProductRequest;
-import com.neoapps.usecase.dtos.CreateProductResponse;
 
 public class RegisterProductUseCase {
 
@@ -17,32 +16,24 @@ public class RegisterProductUseCase {
         this.productRepositoryGateway = productRepositoryGateway;
     }
 
-    public CreateProductResponse createProduct(CreateProductRequest createProductRequest) {
+    public void createProduct(CreateProductRequest createProductRequest) {
+
+        if (createProductRequest == null) {
+            throw new DomainException("CreateProductRequest can't be null", "CreateProductRequest");
+        }
 
         if (createProductRequest.getWholesalePrice() >= createProductRequest.getRetailPrice()) {
             throw new DomainException("Wholesale price can't be higher or equal to retail price", "WholesalePrice");
         }
 
-        Boolean productAlreadyExist = productRepositoryGateway.existsByName(createProductRequest.getName());
+        boolean productAlreadyExist = productRepositoryGateway.existsByName(createProductRequest.getName());
         if (productAlreadyExist) {
             throw new DomainException("A product named: '" + createProductRequest.getName() + "' already exists", "ProductName");
         }
 
         Product product = buildProduct(createProductRequest);
+        productRepositoryGateway.createProduct(product);
 
-        Product productSaved = productRepositoryGateway.createProduct(product);
-
-        return new CreateProductResponse(
-                productSaved.getId(),
-                productSaved.getName(),
-                productSaved.getDescription(),
-                productSaved.getStock(),
-                productSaved.getRetailPrice(),
-                productSaved.getWholeSalePrice(),
-                productSaved.getSupplier().getName(),
-                productSaved.getBrand().getName(),
-                productSaved.getCategory().getName(),
-                productSaved.getCreationTime());
     }
 
     private Product buildProduct(CreateProductRequest createProductRequest) {
